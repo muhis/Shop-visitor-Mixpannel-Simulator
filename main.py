@@ -114,7 +114,6 @@ class Visit(object):
         """
         """
         steps = self.generate_steps()
-        add_user_to_all_projects(user=self.requester)
         step_return_value: dict = {}
         for step in steps:
             time_to_sleep = random.choice(range(1, 3))
