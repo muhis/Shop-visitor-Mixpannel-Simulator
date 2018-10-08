@@ -223,7 +223,25 @@ def start_script():
                 threading.Thread(target=start_a_visit).start()
             except Exception as err:
                 logger.exception(err)
+def save_users_pool():
+    file_path = os.path.dirname(os.path.abspath(__file__))
+    with open(file_path + "\\users_pool.pydmp", 'wb') as opened_file:
+        pickle.dump(users_pool, opened_file)
+
+
+def load_users_pool():
+    file_path = os.path.dirname(os.path.abspath(__file__))
+    logger.info('Loading users list from %s', file_path)
+    users_pool = []
+    try:
+        with open(file_path + "\\users_pool.pydmp", 'rb') as opened_file:
+            users_pool = pickle.load(opened_file)
+            logger.info('Loaded %i users to the pool', len(users_pool))
+    except FileNotFoundError as error:
+        logger.info('No prior users list found. Skipping users load process.')
+    return users_pool
 
 
 if __name__ == '__main__':
+    users_pool = load_users_pool()
     start_script()
