@@ -53,7 +53,7 @@ STEPS = {
     },
     STEP_CHECKOUT: {
         'human_readable': 'Checkout',
-        'next_steps': [(STEP_REGISTER, 60), (STEP_PAY, 30), (STEP_DROP, 10)],
+        'next_steps': [(STEP_REGISTER, 80), (STEP_DROP, 20)],
         'requires': ['cart_content']
     },
     STEP_REGISTER: {
