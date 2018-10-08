@@ -1,21 +1,27 @@
-from weighted_random import weighted_random_choice
-import requests
-import random
-import random_user
-import uuid
 import json
-from time import sleep
-from user_agent import generate_navigator
 import logging
-from mixpanel import Mixpanel  # For typing purposes
-from mixpanel_projects import ACTIVE_PROJECTS, add_user_to_all_projects, charge_user_to_all_projects
-from constants import *
-from typing import List, ClassVar, Any, Optional
+import random
 import sys
 import threading
-from random_user import generate_random_user_properties
-from random_user import generate_random_ip
-from random_user import random_bool
+import uuid
+import os
+from time import sleep
+from typing import Any, ClassVar, List, Optional
+import pickle
+import requests
+from mixpanel import Mixpanel  # For typing purposes
+from user_agent import generate_navigator
+
+import random_user
+from constants import *
+from mixpanel_projects import (ACTIVE_PROJECTS, add_user_to_all_projects,
+                               charge_user_to_all_projects,
+                               set_people_first_purchase,
+                               set_people_last_purchase)
+from random_user import (generate_random_ip, generate_random_user_properties,
+                         random_bool)
+from weighted_random import weighted_random_choice
+
 # Logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
