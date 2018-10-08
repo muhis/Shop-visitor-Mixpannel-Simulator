@@ -48,6 +48,9 @@ class BaseShopper(object):
         }
         self.properties = self.base_properties
 
+    def __repr__(self):
+        return "Unregistered User"
+
     def visit(self, end_point: str, extra: Optional[dict] = None):
         """
         Send mixpannel API a visit metric.
@@ -85,6 +88,9 @@ class User(BaseShopper):
         }
         add_user_to_all_projects(user=self)
         users_pool.append(self)
+
+    def __repr__(self):
+        return "Registered User"
 
     @classmethod
     def register_requester(cls, requester: UnregisteredShopper):
