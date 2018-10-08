@@ -2,6 +2,11 @@ from random_useragent.random_useragent import Randomize
 from typing import List
 MIXPANNEL_TOKENS: List[str] = [
     '520a47b63098ffbb27467bc2756a295b', '7c0ae2b86bddaf03a7030d956f677b1a'
+FINNISH_IP_ADDRESSES = [
+    ('37.33.0.0', '37.33.255.255'),
+    ('37.136.0.0', '37.136.255.255'),
+    ('62.78.128.0', '62.78.255.255'),
+    ('80.220.0.0', '80.220.0.0'),
 ]
 RANDOM_USERS_URL: str = 'https://randomuser.me/api/'
 MUFFIN_BANANA = 'Banana muffin'

@@ -1,6 +1,6 @@
 import json
 import requests
-from constants import RANDOM_USERS_URL, STEPS
+from constants import RANDOM_USERS_URL, STEPS, FINNISH_IP_ADDRESSES
 from ipaddress import IPv4Address, AddressValueError
 from datetime import datetime, date, timedelta
 import random
@@ -62,20 +62,15 @@ def generate_random_ip() ->str:
     https://codereview.stackexchange.com/questions/200337/random-ip-address-generator
     with some changes to generate valid looking IP addresses.
     """
-    while (True):
-        trials: int = 0
-        try:
-            trials += 1
-            # instances an IPv4Address object from those bits
-            # generates an integer with 32 random bits
-            bits = random.getrandbits(32)
-            addr = IPv4Address(bits)
-        except AddressValueError:
-            continue
-        if not addr.is_private or not addr.is_reserved:
-            break
-    ip_address = str(addr)
-    return ip_address
+    start, finish = random.choice(FINNISH_IP_ADDRESSES)
+    start = start.split('.')
+    finish = finish.split('.')
+    result = []
+    for octal in start:
+        if octal == '0':
+            octal = str(random.choice(range(1, 254)))
+        result.append(octal)
+    return '.'.join(result)
 
 
 def random_bool() -> bool:
