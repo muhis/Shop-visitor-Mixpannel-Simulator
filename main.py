@@ -123,6 +123,14 @@ class Visit(object):
                 step=step, dependency=step_return_value
             )
 
+    def calculate_cost(self):
+        total_cost = 0
+        for item in PRODUCTS_PRICES.keys():
+            item_price = PRODUCTS_PRICES[item]
+            line_price = item_price * self.user_cart[item]
+            total_cost += line_price
+        return total_cost
+
     def execute_step(self, step: str, dependency: Optional[dict] = None):
         """
         Generate appropriate step add on then execute it.
@@ -155,11 +163,7 @@ class Visit(object):
             extra=visit_parameters
         )
         if step == STEP_PAY:
-            total_cost = 0
-            for item in PRODUCTS_PRICES.keys():
-                item_price = PRODUCTS_PRICES[item]
-                line_price = item_price * self.user_cart[item]
-                total_cost += line_price
+            total_cost = self.calculate_cost()
             logger.info(f'user {self.requester.uuid} payed {total_cost}')
             self.requester.charge(total_cost, self.user_cart)
             self.empty_cart()
