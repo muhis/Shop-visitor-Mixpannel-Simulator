@@ -64,7 +64,7 @@ STEPS = {
     STEP_PAY: {
         'human_readable': 'Payment',
         'next_steps': [(STEP_DROP, 100)],
-        'requires': ['cart_content']
+        'requires': ['cart_value']
     },
     STEP_DROP: {
         'human_readable': 'Drop',
