@@ -128,7 +128,7 @@ class Visit(object):
         steps = self.generate_steps()
         step_return_value: dict = {}
         for step in steps:
-            time_to_sleep = random.choice(range(1, 3))
+            time_to_sleep = random.choice(range(3, 9))
             # we inject a delay here since real users don't make multithread requests.
             sleep(time_to_sleep)
             step_return_value = self.execute_step(
@@ -184,6 +184,8 @@ class Visit(object):
             total_cost = self.calculate_cost()
             logger.info(f'user {self.requester.uuid} payed {total_cost}')
             self.requester.charge(total_cost, self.user_cart)
+            set_people_first_purchase(self.requester)
+            set_people_last_purchase(self.requester)
             self.empty_cart()
         return generated_params
 
@@ -191,7 +193,6 @@ class Visit(object):
 def pick_random_requester() -> BaseShopper:
     is_registered = random_bool()
     requester: BaseShopper
-    if is_registered and users_pool:
     if len(users_pool) >= MAX_NUMBER_OF_REGISTERED_USERS:
         # No calculation is needed. Return a registered user.
         return random.choice(users_pool)
@@ -218,11 +219,16 @@ def start_a_visit():
 
 def start_script():
     while True:
-        if threading.active_count() < 10 and threading.active_count() >= 0:
+        users_pool_count = len(users_pool)
+        if threading.active_count() < 4 and threading.active_count() >= 0:
             try:
                 threading.Thread(target=start_a_visit).start()
             except Exception as err:
                 logger.exception(err)
+        if len(users_pool) != users_pool_count:
+            save_users_pool()
+
+
 def save_users_pool():
     file_path = os.path.dirname(os.path.abspath(__file__))
     with open(file_path + "\\users_pool.pydmp", 'wb') as opened_file:
