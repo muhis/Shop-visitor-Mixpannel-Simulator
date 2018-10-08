@@ -158,10 +158,11 @@ class Visit(object):
         visit_parameters: dict = {}
         if dependency:
             visit_parameters = {**generated_params, **dependency}
-        self.requester.visit(
-            end_point=human_readable_name,
-            extra=visit_parameters
-        )
+        if step != STEP_DROP:
+            self.requester.visit(
+                end_point=human_readable_name,
+                extra=visit_parameters
+            )
         if step == STEP_PAY:
             total_cost = self.calculate_cost()
             logger.info(f'user {self.requester.uuid} payed {total_cost}')
