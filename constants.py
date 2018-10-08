@@ -43,32 +43,32 @@ STEP_PAY = 'pay'
 STEP_DROP = 'drop'
 STEPS = {
     STEP_MAIN: {
-        'human_readable': 'Home Page',
+        'human_readable': 'Home Page Viewed',
         'next_steps': [(STEP_VIEW_ITEM, 80), (STEP_DROP, 20)]
     },
     STEP_VIEW_ITEM: {
-        'human_readable': 'Item Page',
+        'human_readable': 'Item Page Viewed',
         'next_steps': [(STEP_VIEW_ITEM, 30), (STEP_ADD_ITEM_TO_CART, 30), (STEP_MAIN, 30), (STEP_DROP, 10)],
         'generates': ['item_name']
     },
     STEP_ADD_ITEM_TO_CART: {
-        'human_readable': 'Add item to cart',
+        'human_readable': 'Item Added To Cart',
         'next_steps': [(STEP_VIEW_ITEM, 35), (STEP_MAIN, 25), (STEP_DROP, 10), (STEP_CHECKOUT, 30)],
         'generates': ['item_count'],
         'requires': ['item_name'],
     },
     STEP_CHECKOUT: {
-        'human_readable': 'Checkout',
+        'human_readable': 'Checkout Initiated',
         'next_steps': [(STEP_REGISTER, 80), (STEP_DROP, 20)],
         'requires': ['cart_content']
     },
     STEP_REGISTER: {
-        'human_readable': 'Register',
+        'human_readable': 'Customer Registered',
         'next_steps': [(STEP_PAY, 80), (STEP_MAIN, 20)],
         'requires': ['register_user'],
     },
     STEP_PAY: {
-        'human_readable': 'Payment',
+        'human_readable': 'Order Paid',
         'next_steps': [(STEP_DROP, 100)],
         'requires': ['cart_value']
     },
