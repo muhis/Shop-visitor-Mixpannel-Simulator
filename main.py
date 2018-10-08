@@ -155,6 +155,11 @@ class Visit(object):
             generated_params.update(
                 {**self.user_cart}
             )
+
+        if 'cart_value' in step_requirements:
+            generated_params.update(
+                {'Cart value': self.calculate_cost()}
+            )
         visit_parameters: dict = {}
         if dependency:
             visit_parameters = {**generated_params, **dependency}
