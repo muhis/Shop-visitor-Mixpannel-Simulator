@@ -192,9 +192,22 @@ def pick_random_requester() -> BaseShopper:
     is_registered = random_bool()
     requester: BaseShopper
     if is_registered and users_pool:
+    if len(users_pool) >= MAX_NUMBER_OF_REGISTERED_USERS:
+        # No calculation is needed. Return a registered user.
+        return random.choice(users_pool)
+    new_users_weight = MAX_NUMBER_OF_REGISTERED_USERS - len(users_pool)
+    is_chosen_registered = weighted_random_choice(
+        [(False, new_users_weight), (True, MAX_NUMBER_OF_REGISTERED_USERS)]
+    )
+
+    if is_chosen_registered and users_pool:
         requester = random.choice(users_pool)
     else:
         requester = UnregisteredShopper()
+    logger.info(
+        'Requester chosen to be %s. %i registration spots left',
+        requester, new_users_weight
+    )
     return requester
 
 

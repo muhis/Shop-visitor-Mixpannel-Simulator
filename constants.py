@@ -13,6 +13,7 @@ MUFFIN_BANANA = 'Banana muffin'
 MUFFIN_DARK = 'Dark Chocolate muffin'
 MUFFIN_RAISINS = 'Raisins muffin'
 MUFFIN_VANILLA = 'Vanilla muffin'
+MAX_NUMBER_OF_REGISTERED_USERS = 900
 SHOP_PRODUCTS = [
     (MUFFIN_DARK, 40),
     (MUFFIN_BANANA, 20),
