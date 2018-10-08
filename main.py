@@ -1,21 +1,27 @@
-from weighted_random import weighted_random_choice
-import requests
-import random
-import random_user
-import uuid
 import json
-from time import sleep
-from user_agent import generate_navigator
 import logging
-from mixpanel import Mixpanel  # For typing purposes
-from mixpanel_projects import ACTIVE_PROJECTS, add_user_to_all_projects, charge_user_to_all_projects
-from constants import *
-from typing import List, ClassVar, Any, Optional
+import random
 import sys
 import threading
-from random_user import generate_random_user_properties
-from random_user import generate_random_ip
-from random_user import random_bool
+import uuid
+import os
+from time import sleep
+from typing import Any, ClassVar, List, Optional
+import pickle
+import requests
+from mixpanel import Mixpanel  # For typing purposes
+from user_agent import generate_navigator
+
+import random_user
+from constants import *
+from mixpanel_projects import (ACTIVE_PROJECTS, add_user_to_all_projects,
+                               charge_user_to_all_projects,
+                               set_people_first_purchase,
+                               set_people_last_purchase)
+from random_user import (generate_random_ip, generate_random_user_properties,
+                         random_bool)
+from weighted_random import weighted_random_choice
+
 # Logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -41,6 +47,9 @@ class BaseShopper(object):
             **generated_technical_data,
         }
         self.properties = self.base_properties
+
+    def __repr__(self):
+        return "Unregistered User"
 
     def visit(self, end_point: str, extra: Optional[dict] = None):
         """
@@ -80,6 +89,9 @@ class User(BaseShopper):
         add_user_to_all_projects(user=self)
         users_pool.append(self)
 
+    def __repr__(self):
+        return "Registered User"
+
     @classmethod
     def register_requester(cls, requester: UnregisteredShopper):
         return cls(unregistered_shopper=requester)
@@ -114,15 +126,22 @@ class Visit(object):
         """
         """
         steps = self.generate_steps()
-        add_user_to_all_projects(user=self.requester)
         step_return_value: dict = {}
         for step in steps:
-            time_to_sleep = random.choice(range(1, 3))
+            time_to_sleep = random.choice(range(3, 9))
             # we inject a delay here since real users don't make multithread requests.
             sleep(time_to_sleep)
             step_return_value = self.execute_step(
                 step=step, dependency=step_return_value
             )
+
+    def calculate_cost(self):
+        total_cost = 0
+        for item in PRODUCTS_PRICES.keys():
+            item_price = PRODUCTS_PRICES[item]
+            line_price = item_price * self.user_cart[item]
+            total_cost += line_price
+        return total_cost
 
     def execute_step(self, step: str, dependency: Optional[dict] = None):
         """
@@ -148,21 +167,25 @@ class Visit(object):
             generated_params.update(
                 {**self.user_cart}
             )
+
+        if 'cart_value' in step_requirements:
+            generated_params.update(
+                {'Cart value': self.calculate_cost()}
+            )
         visit_parameters: dict = {}
         if dependency:
             visit_parameters = {**generated_params, **dependency}
-        self.requester.visit(
-            end_point=human_readable_name,
-            extra=visit_parameters
-        )
+        if step != STEP_DROP:
+            self.requester.visit(
+                end_point=human_readable_name,
+                extra=visit_parameters
+            )
         if step == STEP_PAY:
-            total_cost = 0
-            for item in PRODUCTS_PRICES.keys():
-                item_price = PRODUCTS_PRICES[item]
-                line_price = item_price * self.user_cart[item]
-                total_cost += line_price
+            total_cost = self.calculate_cost()
             logger.info(f'user {self.requester.uuid} payed {total_cost}')
             self.requester.charge(total_cost, self.user_cart)
+            set_people_first_purchase(self.requester)
+            set_people_last_purchase(self.requester)
             self.empty_cart()
         return generated_params
 
@@ -170,10 +193,22 @@ class Visit(object):
 def pick_random_requester() -> BaseShopper:
     is_registered = random_bool()
     requester: BaseShopper
-    if is_registered and users_pool:
+    if len(users_pool) >= MAX_NUMBER_OF_REGISTERED_USERS:
+        # No calculation is needed. Return a registered user.
+        return random.choice(users_pool)
+    new_users_weight = MAX_NUMBER_OF_REGISTERED_USERS - len(users_pool)
+    is_chosen_registered = weighted_random_choice(
+        [(False, new_users_weight), (True, MAX_NUMBER_OF_REGISTERED_USERS)]
+    )
+
+    if is_chosen_registered and users_pool:
         requester = random.choice(users_pool)
     else:
         requester = UnregisteredShopper()
+    logger.info(
+        'Requester chosen to be %s. %i registration spots left',
+        requester, new_users_weight
+    )
     return requester
 
 
@@ -184,12 +219,35 @@ def start_a_visit():
 
 def start_script():
     while True:
-        if threading.active_count() < 10 and threading.active_count() >= 0:
+        users_pool_count = len(users_pool)
+        if threading.active_count() < 4 and threading.active_count() >= 0:
             try:
                 threading.Thread(target=start_a_visit).start()
             except Exception as err:
                 logger.exception(err)
+        if len(users_pool) != users_pool_count:
+            save_users_pool()
+
+
+def save_users_pool():
+    file_path = os.path.dirname(os.path.abspath(__file__))
+    with open(file_path + "\\users_pool.pydmp", 'wb') as opened_file:
+        pickle.dump(users_pool, opened_file)
+
+
+def load_users_pool():
+    file_path = os.path.dirname(os.path.abspath(__file__))
+    logger.info('Loading users list from %s', file_path)
+    users_pool = []
+    try:
+        with open(file_path + "\\users_pool.pydmp", 'rb') as opened_file:
+            users_pool = pickle.load(opened_file)
+            logger.info('Loaded %i users to the pool', len(users_pool))
+    except FileNotFoundError as error:
+        logger.info('No prior users list found. Skipping users load process.')
+    return users_pool
 
 
 if __name__ == '__main__':
+    users_pool = load_users_pool()
     start_script()

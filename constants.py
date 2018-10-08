@@ -2,12 +2,18 @@ from random_useragent.random_useragent import Randomize
 from typing import List
 MIXPANNEL_TOKENS: List[str] = [
     '520a47b63098ffbb27467bc2756a295b', '7c0ae2b86bddaf03a7030d956f677b1a'
+FINNISH_IP_ADDRESSES = [
+    ('37.33.0.0', '37.33.255.255'),
+    ('37.136.0.0', '37.136.255.255'),
+    ('62.78.128.0', '62.78.255.255'),
+    ('80.220.0.0', '80.220.0.0'),
 ]
 RANDOM_USERS_URL: str = 'https://randomuser.me/api/'
 MUFFIN_BANANA = 'Banana muffin'
 MUFFIN_DARK = 'Dark Chocolate muffin'
 MUFFIN_RAISINS = 'Raisins muffin'
 MUFFIN_VANILLA = 'Vanilla muffin'
+MAX_NUMBER_OF_REGISTERED_USERS = 900
 SHOP_PRODUCTS = [
     (MUFFIN_DARK, 40),
     (MUFFIN_BANANA, 20),
@@ -53,7 +59,7 @@ STEPS = {
     },
     STEP_CHECKOUT: {
         'human_readable': 'Checkout',
-        'next_steps': [(STEP_REGISTER, 60), (STEP_PAY, 30), (STEP_DROP, 10)],
+        'next_steps': [(STEP_REGISTER, 80), (STEP_DROP, 20)],
         'requires': ['cart_content']
     },
     STEP_REGISTER: {
@@ -64,7 +70,7 @@ STEPS = {
     STEP_PAY: {
         'human_readable': 'Payment',
         'next_steps': [(STEP_DROP, 100)],
-        'requires': ['cart_content']
+        'requires': ['cart_value']
     },
     STEP_DROP: {
         'human_readable': 'Drop',
