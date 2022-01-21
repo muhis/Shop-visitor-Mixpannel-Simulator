@@ -7,7 +7,7 @@ colorama==0.3.9
 decorator==4.3.0
 idna==2.7
 ipdb==0.11
-ipython==7.0.1
+ipython==7.16.3
 ipython-genutils==0.2.0
 jedi==0.12.1
 mixpanel==4.3.2
